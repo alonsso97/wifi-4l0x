@@ -94,7 +94,11 @@ echo -e
 		echo -e $azul "Enabling monitor mode..."
 		sleep 1
 		echo -e
-	        xterm -e "airmon-ng start $interfaz" 
+
+ifconfig $interfaz down
+iwconfig $interfaz mode monitor
+ifconfig $interfaz up
+
 		inter=`ifconfig -a | awk '/^[a-zA-Z0-9]/{print $1}' | cut -d ':' -f 1` 
                 lineas=`echo "$inter" | wc -l`
                 echo -e $amarillo "Available interfaces:" $fincolor
@@ -113,18 +117,11 @@ echo -e
 	fi
 sleep 3
 
-
-	#Interfaz en modo monitor
-#	xterm -e "airmon-ng start $interfaz" 
-
-#	ifconfig wlan0 200.200.200.1 netmask 255.255.255.0
-#	route add -net 200.200.200.0 netmask 255.255.255.0 gw 200.200.200.1 2>/dev/null
-
-
 case $number in
         1)
-	        ifconfig wlan0 200.200.200.1 netmask 255.255.255.0
+	        ifconfig $interfaz 200.200.200.1 netmask 255.255.255.0
         	route add -net 200.200.200.0 netmask 255.255.255.0 gw 200.200.200.1 2>/dev/null
+		echo 1 > /proc/sys/net/ipv4/ip_forward
 
 		iptables -P FORWARD ACCEPT
 		iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -137,7 +134,7 @@ host="interface=$interfaz
 driver=nl80211
 ssid=$red
 hw_mode=g
-channel=12
+channel=6
 macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0"
@@ -146,8 +143,10 @@ archivoHost="hostapd.conf"
 echo "$host" > "$archivoHost"
 
 
+sleep 2
 	xterm -e "hostapd hostapd.conf" &
 
+sleep 2
 
 dns="interface=$interfaz
 dhcp-range=200.200.200.2,200.200.200.10,255.255.255.0,12h
@@ -161,16 +160,16 @@ archivoDNS="dnsmasq.conf"
 
 echo "$dns" > "$archivoDNS"
 
-
-sleep 3
+sleep 2
 		xterm -e "dnsmasq -C dnsmasq.conf -d" &
 
+sleep 2
 echo -e
 	echo -e $azul2 "ACCESS POINT OPEN" $fincolor
 	;;
 
 2)
-        ifconfig wlan0 200.200.200.1 netmask 255.255.255.0
+        ifconfig $interfaz 200.200.200.1 netmask 255.255.255.0
         route add -net 200.200.200.0 netmask 255.255.255.0 gw 200.200.200.1 2>/dev/null
 
 
@@ -184,7 +183,7 @@ host="interface=$interfaz
 driver=nl80211
 ssid=$red
 hw_mode=g
-channel=12
+channel=6
 macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0"
@@ -245,7 +244,6 @@ sleep 5
 
 ;;
 6)
-#	xterm -e "airmon-ng start $interfaz"
 
 
 	xterm -e "airodump-ng $interfaz --band abg" 
